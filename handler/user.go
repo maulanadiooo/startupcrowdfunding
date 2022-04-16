@@ -31,7 +31,7 @@ func (h *userHandler) RegisterUser(c *gin.Context) {
 
 		errorMessage := gin.H{"errors:": errors}
 
-		response := helper.APIResponse("Account has been failed", http.StatusUnprocessableEntity, "error", errorMessage)
+		response := helper.APIResponse("Account has been failed to register", http.StatusUnprocessableEntity, "error", errorMessage)
 		c.JSON(http.StatusUnprocessableEntity, response)
 		return
 	}
@@ -39,7 +39,7 @@ func (h *userHandler) RegisterUser(c *gin.Context) {
 	newUser, err := h.userService.RegisterUser(input)
 
 	if err != nil {
-		response := helper.APIResponse("Account has been failed", http.StatusBadRequest, "error", nil)
+		response := helper.APIResponse("Account has been failed to register", http.StatusBadRequest, "error", nil)
 		c.JSON(http.StatusBadRequest, response)
 		return
 	}
@@ -49,4 +49,46 @@ func (h *userHandler) RegisterUser(c *gin.Context) {
 	response := helper.APIResponse("Account has been registered", http.StatusOK, "success", formatter)
 
 	c.JSON(http.StatusOK, response)
+}
+
+func (h *userHandler) Login(c *gin.Context) {
+	// masukkan input oleh user [email dan password]
+	// input ditangkap oleh handler
+	// mapping dari input user ke input struct
+	// input struct di pasrsing ke service
+	// di service mencari degan bantuan repositroy user dengan email yang di input
+	// jika ketemu cocokkan passwordnya
+
+	var input user.LoginInput
+
+	err := c.ShouldBindJSON(input)
+
+	if err != nil {
+
+		errors := helper.FormateValidationError(err)
+
+		errorMessage := gin.H{"errors:": errors}
+
+		response := helper.APIResponse("Login failed", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	loggedinUser, err := h.userService.Login(input)
+
+	if err != nil {
+		errorMessage := gin.H{"errors:": err.Error()}
+
+		response := helper.APIResponse("Login failed", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+
+	}
+
+	formatter := user.FormatUser(loggedinUser, "jajajajajaja")
+
+	response := helper.APIResponse("Login success", http.StatusOK, "success", formatter)
+
+	c.JSON(http.StatusOK, response)
+
 }
