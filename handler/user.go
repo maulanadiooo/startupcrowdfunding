@@ -40,6 +40,11 @@ func (h *userHandler) RegisterUser(c *gin.Context) {
 	}
 
 	newUser, err := h.userService.RegisterUser(input)
+	if newUser.ID == 0 {
+		response := helper.APIResponse("Account with that email already registered", http.StatusUnprocessableEntity, "error", nil)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
 
 	if err != nil {
 		response := helper.APIResponse("Account has been failed to register", http.StatusBadRequest, "error", nil)
@@ -131,7 +136,7 @@ func (h *userHandler) CheckEmailAvailable(c *gin.Context) {
 		return
 	}
 
-	isEmailAvailable, err := h.userService.IsemailAvailable(input)
+	isEmailAvailable, err := h.userService.IsEmailAvailable(input)
 
 	if err != nil {
 		errorMessage := gin.H{"errors:": "Server error"}

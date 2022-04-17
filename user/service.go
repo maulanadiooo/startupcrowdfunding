@@ -9,7 +9,7 @@ import (
 type Service interface {
 	RegisterUser(input RegisteruserInput) (User, error)
 	Login(input LoginInput) (User, error)
-	IsemailAvailable(input CheckEmailInnput) (bool, error)
+	IsEmailAvailable(input CheckEmailInnput) (bool, error)
 	SaveAvatar(id int, filelocation string) (User, error)
 }
 
@@ -25,6 +25,17 @@ func (s *service) RegisterUser(input RegisteruserInput) (User, error) {
 	user := User{}
 	user.Name = input.Name
 	user.Email = input.Email
+
+	userTest, err := s.repository.FindByEmail(input.Email)
+
+	if err != nil {
+		return user, err
+	}
+
+	if userTest.ID != 0 {
+		return user, err
+	}
+
 	user.Occupation = input.Occupation
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.MinCost)
 
@@ -67,7 +78,7 @@ func (s *service) Login(input LoginInput) (User, error) {
 	return user, nil
 }
 
-func (s *service) IsemailAvailable(input CheckEmailInnput) (bool, error) {
+func (s *service) IsEmailAvailable(input CheckEmailInnput) (bool, error) {
 	email := input.Email
 
 	user, err := s.repository.FindByEmail(email)
